@@ -12,7 +12,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-image: linear-gradient(to top right, #fde2e4, #e6d1f2);
+            background-color: #111827; /* Tailwind gray-900 */
         }
         #main-content.no-scroll {
              touch-action: none;
@@ -56,49 +56,59 @@
             0% { transform: scale(0.5); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
+        /* Style for locked tasks */
+        .task-item-locked {
+            opacity: 0.6;
+            cursor: not-allowed !important; /* Force cursor */
+            background-color: #1f2937; /* gray-800 */
+        }
+        .task-item-locked:hover {
+            border-color: #374151; /* gray-700, no special hover effect */
+            box-shadow: none;
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-    <div id="main-content" class="w-full max-w-md mx-auto bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl shadow-purple-200/50 p-6 md:p-8 text-center transition-all duration-500">
+    <div id="main-content" class="w-full max-w-md mx-auto bg-gray-950/70 backdrop-blur-xl rounded-3xl shadow-2xl shadow-red-800/20 p-6 md:p-8 text-center transition-all duration-500">
 
         <!-- Header Section --><header id="header-section">
-            <img id="logo" src="https://placehold.co/100x100/E6D1F2/4A1D49?text=BC" alt="Cafe Logo" class="w-24 h-24 mx-auto mb-4 rounded-full shadow-lg border-4 border-white">
-            <h1 id="restaurant-name" class="text-3xl md:text-4xl font-bold text-gray-800">Restaurant Name</h1>
-            <p class="text-gray-600 mt-2 text-lg">Complete a couple of tasks to unlock a surprise discount!</p>
+            <img id="logo" src="ScratchCard/kw.PNG" alt="Cafe Logo" class="w-24 h-24 mx-auto mb-4 rounded-full shadow-lg border-4 border-white">
+            <h1 id="restaurant-name" class="text-3xl md:text-4xl font-bold text-gray-100">Restaurant Name</h1>
+            <p class="text-gray-400 mt-2 text-lg">Complete a couple of tasks to unlock a surprise discount!</p>
         </header>
 
         <!-- Tasks Section --><div id="tasks-section" class="mt-8 space-y-3">
             <!-- Tasks will be dynamically inserted here --></div>
         
         <!-- Get Card Button Section (Initially hidden) --><div id="get-card-button-section" class="hidden mt-8">
-            <h2 class="text-2xl font-bold text-pink-500 mb-2">Tasks Complete!</h2>
-            <p class="text-gray-600 mb-6">You've unlocked your reward. Click below to claim it!</p>
-            <button id="get-card-btn" class="bg-gradient-to-br from-pink-500 to-purple-600 text-white font-bold py-4 px-10 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-lg">
+            <h2 class="text-2xl font-bold text-red-500 mb-2">Tasks Complete!</h2>
+            <p class="text-gray-300 mb-6">You've unlocked your reward. Click below to claim it!</p>
+            <button id="get-card-btn" class="bg-gradient-to-br from-red-600 to-red-800 text-white font-bold py-4 px-10 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-lg">
                 Get Your Scratch Card
             </button>
         </div>
         
         <!-- Already Claimed Section (Initially Hidden) --><div id="already-claimed-section" class="hidden mt-8 text-center">
-            <h2 class="text-2xl font-bold text-purple-600 mb-2">Welcome Back!</h2>
-            <p class="text-gray-700 mb-4">You've already claimed a discount recently. Here's your code:</p>
-            <p id="claimed-discount-code" class="text-2xl font-mono bg-purple-100 text-purple-800 px-6 py-3 rounded-lg inline-block border border-purple-200"></p>
-            <p class="text-sm text-gray-500 mt-4">This code is valid for 24 hours.</p>
+            <h2 class="text-2xl font-bold text-red-500 mb-2">Welcome Back!</h2>
+            <p class="text-gray-300 mb-4">You've already claimed a discount recently. Here's your code:</p>
+            <p id="claimed-discount-code" class="text-2xl font-mono bg-gray-800 text-red-300 px-6 py-3 rounded-lg inline-block border border-gray-700"></p>
+            <p class="text-sm text-gray-400 mt-4">This code is valid for 24 hours.</p>
         </div>
 
     </div>
     
     <!-- Scratch Card Modal (Initially Hidden) --><div id="scratch-modal-overlay" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4">
-        <div id="scratch-card-section" class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 text-center w-full max-w-md relative">
-            <button id="close-modal-btn" class="absolute top-3 right-4 text-gray-400 hover:text-gray-700 text-4xl transition-colors">&times;</button>
-            <h2 class="text-2xl font-bold text-purple-600 mb-2">Congratulations!</h2>
-            <p class="text-gray-500 mb-5">Scratch the card below to reveal your surprise!</p>
-            <div id="scratch-card-container" class="relative w-full h-48 md:h-56 rounded-xl flex items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100">
+        <div id="scratch-card-section" class="bg-gray-900 rounded-3xl shadow-2xl p-6 md:p-8 text-center w-full max-w-md relative">
+            <button id="close-modal-btn" class="absolute top-3 right-4 text-gray-500 hover:text-white text-4xl transition-colors">&times;</button>
+            <h2 class="text-2xl font-bold text-red-500 mb-2">Congratulations!</h2>
+            <p class="text-gray-400 mb-5">Scratch the card below to reveal your surprise!</p>
+            <div id="scratch-card-container" class="relative w-full h-48 md:h-56 rounded-xl flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800">
                 <!-- The revealed discount is under the canvas --><div id="result-text" class="text-center opacity-0">
-                     <p class="text-lg text-gray-700 font-medium">You've won a</p>
-                    <h3 class="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600 my-1"></h3>
-                    <p class="text-sm text-gray-500 mt-2">Show this code to the cashier</p>
-                    <p id="discount-code" class="mt-2 text-xl font-mono tracking-widest bg-gray-100 px-4 py-2 rounded-lg inline-block border"></p>
+                     <p class="text-lg text-gray-300 font-medium">You've won a</p>
+                    <h3 class="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400 my-1"></h3>
+                    <p class="text-sm text-gray-400 mt-2">Show this code to the cashier</p>
+                    <p id="discount-code" class="mt-2 text-xl text-white font-mono tracking-widest bg-gray-700 px-4 py-2 rounded-lg inline-block border border-gray-600"></p>
                 </div>
                 <!-- The scratchable canvas is on top --><canvas id="scratch-card-canvas" class="absolute top-0 left-0 w-full h-full rounded-xl"></canvas>
             </div>
@@ -113,8 +123,8 @@
             // === CONFIGURATION: Edit these values for each restaurant ===
             // =================================================================
             const config = {
-                restaurantName: "Banjo Cafe",
-                logoUrl: "https://placehold.co/100x100/EAD9F2/4A1D49?text=BC", // Placeholder Logo
+                restaurantName: "Hotel Khandesh Wada",
+                 logoUrl: "kw.png", // Placeholder Logo
                 tasks: [
                     {
                         name: "Google Review",
@@ -125,7 +135,7 @@
                     {
                         name: "Instagram Follow",
                         description: "Follow us on Instagram",
-                        icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="stroke-pink-500"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`,
+                        icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="stroke-red-500"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`,
                         url: "https://www.instagram.com/banjos_jalgaon?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
                     }
                 ],
@@ -172,17 +182,28 @@
 
                 config.tasks.forEach((task, index) => {
                     const taskEl = document.createElement('div');
-                    taskEl.className = 'task-item bg-white/80 p-4 border border-gray-200 rounded-xl flex items-center justify-between transition-all hover:shadow-md hover:border-purple-300 cursor-pointer';
-                    // Checkbox is now disabled by default and has a different cursor style
+                    taskEl.className = 'task-item bg-gray-800/80 p-4 border border-gray-700 rounded-xl flex items-center justify-between transition-all hover:shadow-md hover:border-red-500 cursor-pointer';
+                    
+                    // Lock all tasks except the first one initially
+                    if (index > 0) {
+                        taskEl.classList.add('task-item-locked');
+                    }
+
                     taskEl.innerHTML = `
                         <div class="flex items-center text-left flex-grow pointer-events-none">
                             <div class="mr-4">${task.icon}</div>
-                            <span class="text-gray-700 font-medium task-description">${task.description}</span>
+                            <span class="text-gray-200 font-medium task-description">${task.description}</span>
                         </div>
-                        <input type="checkbox" data-index="${index}" class="h-6 w-6 rounded-md border-gray-300 text-purple-600 focus:ring-purple-500 cursor-not-allowed" disabled>
+                        <input type="checkbox" data-index="${index}" class="h-6 w-6 rounded-md border-gray-600 text-red-600 focus:ring-red-500 cursor-not-allowed" disabled>
                     `;
                     tasksSection.appendChild(taskEl);
+
                     taskEl.addEventListener('click', (e) => {
+                        // Prevent interaction if the task is locked
+                        if (taskEl.classList.contains('task-item-locked')) {
+                            return;
+                        }
+
                         const checkbox = taskEl.querySelector('input[type="checkbox"]');
                         
                         // If the checkbox was disabled, enable it.
@@ -209,9 +230,40 @@
 
             function handleCheckboxChange(event) {
                 const index = parseInt(event.target.dataset.index);
-                tasksState[index] = event.target.checked;
+                const isChecked = event.target.checked;
+                tasksState[index] = isChecked;
                 const taskItem = event.target.closest('.task-item');
                 taskItem.classList.toggle('task-item-completed', event.target.checked);
+
+                const allTaskItems = document.querySelectorAll('.task-item');
+
+                // Unlock the next task OR re-lock all subsequent tasks
+                if (isChecked) {
+                    const nextTaskItem = allTaskItems[index + 1];
+                    if (nextTaskItem) {
+                        nextTaskItem.classList.remove('task-item-locked');
+                    }
+                } else {
+                    // A task was unchecked, so re-lock all tasks that come after it
+                    for (let i = index + 1; i < allTaskItems.length; i++) {
+                        const itemToLock = allTaskItems[i];
+                        const checkboxToLock = itemToLock.querySelector('input[type="checkbox"]');
+                        
+                        itemToLock.classList.add('task-item-locked');
+                        itemToLock.classList.remove('task-item-completed'); // Visually un-complete it
+
+                        if (checkboxToLock.checked) {
+                            checkboxToLock.checked = false; // Uncheck it
+                            tasksState[i] = false; // Update state array
+                        }
+
+                        // Re-disable the checkbox
+                        checkboxToLock.disabled = true;
+                        checkboxToLock.classList.add('cursor-not-allowed');
+                        checkboxToLock.classList.remove('cursor-pointer');
+                    }
+                }
+
                 checkAllTasksCompleted();
             }
 
@@ -264,14 +316,14 @@
                 // Draw the top, scratchable layer on the canvas
                 ctx.globalCompositeOperation = 'source-over';
                 
-                // Create a texture pattern
+                // Create a texture pattern for the scratch layer
                 const patternCanvas = document.createElement('canvas');
                 const patternCtx = patternCanvas.getContext('2d');
                 patternCanvas.width = 10;
                 patternCanvas.height = 10;
-                patternCtx.fillStyle = '#d1d5db'; // background color
+                patternCtx.fillStyle = '#374151'; // background color (gray-700)
                 patternCtx.fillRect(0, 0, 10, 10);
-                patternCtx.fillStyle = '#b0b0b0'; // dot color
+                patternCtx.fillStyle = '#4b5563'; // dot color (gray-600)
                 patternCtx.beginPath();
                 patternCtx.arc(2.5, 2.5, 1.5, 0, 2 * Math.PI);
                 patternCtx.fill();
@@ -283,7 +335,7 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 // Add text on top of the scratchable layer
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
                 ctx.font = '700 1.25rem Inter';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -380,5 +432,4 @@
     </script>
 </body>
 </html>
-
 
