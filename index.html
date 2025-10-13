@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Add confetti library --><script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
         body {
@@ -70,12 +70,12 @@
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-    <div id="main-content" class="w-full max-w-md mx-auto bg-gray-950/70 backdrop-blur-xl rounded-3xl shadow-2xl shadow-red-800/20 p-6 md:p-8 text-center transition-all duration-500">
+    <div id="main-content" class="w-full max-w-md mx-auto bg-gray-950/70 backdrop-blur-xl rounded-3xl shadow-2xl shadow-red-800/20 p-5 sm:p-6 md:p-8 text-center transition-all duration-500">
 
         <!-- Header Section --><header id="header-section">
-            <img id="logo" src="kw.PNG" alt="Cafe Logo" class="w-24 h-24 mx-auto mb-4 rounded-full shadow-lg border-4 border-white">
-            <h1 id="restaurant-name" class="text-3xl md:text-4xl font-bold text-gray-100">Restaurant Name</h1>
-            <p class="text-gray-400 mt-2 text-lg">Complete a couple of tasks to unlock a surprise discount!</p>
+            <img id="logo" src="kw.PNG" alt="Cafe Logo" class="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 rounded-full shadow-lg border-4 border-white">
+            <h1 id="restaurant-name" class="text-3xl sm:text-4xl font-bold text-gray-100">Restaurant Name</h1>
+            <p class="text-gray-400 mt-2 text-base sm:text-lg">Complete a couple of tasks to unlock a surprise discount!</p>
         </header>
 
         <!-- Tasks Section --><div id="tasks-section" class="mt-8 space-y-3">
@@ -84,7 +84,7 @@
         <!-- Get Card Button Section (Initially hidden) --><div id="get-card-button-section" class="hidden mt-8">
             <h2 class="text-2xl font-bold text-red-500 mb-2">Tasks Complete!</h2>
             <p class="text-gray-300 mb-6">You've unlocked your reward. Click below to claim it!</p>
-            <button id="get-card-btn" class="bg-gradient-to-br from-red-600 to-red-800 text-white font-bold py-4 px-10 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-lg">
+            <button id="get-card-btn" class="bg-gradient-to-br from-red-600 to-red-800 text-white font-bold py-3 px-8 sm:py-4 sm:px-10 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-lg w-full sm:w-auto">
                 Get Your Scratch Card
             </button>
         </div>
@@ -99,26 +99,30 @@
     </div>
     
     <!-- Scratch Card Modal (Initially Hidden) --><div id="scratch-modal-overlay" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4">
-        <div id="scratch-card-section" class="bg-gray-900 rounded-3xl shadow-2xl p-6 md:p-8 text-center w-full max-w-md relative">
+        <div id="scratch-card-section" class="bg-gray-900 rounded-3xl shadow-2xl p-5 sm:p-6 md:p-8 text-center w-full max-w-md relative">
             <button id="close-modal-btn" class="absolute top-3 right-4 text-gray-500 hover:text-white text-4xl transition-colors">&times;</button>
             <h2 class="text-2xl font-bold text-red-500 mb-2">Congratulations!</h2>
             <p class="text-gray-400 mb-5">Scratch the card below to reveal your surprise!</p>
-            <div id="scratch-card-container" class="relative w-full h-auto rounded-xl flex flex-col items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800 p-4">
-                <!-- The revealed discount is under the canvas --><div id="result-text" class="text-center opacity-0 h-48 md:h-56 flex flex-col justify-center">
-                     <p class="text-lg text-gray-300 font-medium">You've won a</p>
-                    <h3 class="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400 my-1"></h3>
-                    <p class="text-sm text-gray-400 mt-2">Show this code to the cashier</p>
-                    <p id="discount-code" class="mt-2 text-xl text-white font-mono tracking-widest bg-gray-700 px-4 py-2 rounded-lg inline-block border border-gray-600"></p>
+            <div id="scratch-card-container" class="w-full rounded-xl flex flex-col items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800">
+                <div id="scratch-area" class="relative w-full h-40 sm:h-48 md:h-56">
+                    <!-- The revealed discount is under the canvas -->
+                    <div id="result-text" class="absolute inset-0 flex flex-col items-center justify-center text-center opacity-0 p-2">
+                        <p class="text-lg text-gray-300 font-medium">You've won a</p>
+                        <h3 class="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400 my-1"></h3>
+                        <p class="text-sm text-gray-400 mt-2">Show this code to the cashier</p>
+                        <p id="discount-code" class="mt-2 text-xl text-white font-mono tracking-widest bg-gray-700 px-4 py-2 rounded-lg inline-block border border-gray-600"></p>
+                    </div>
+                    <!-- The scratchable canvas is on top -->
+                    <canvas id="scratch-card-canvas" class="absolute top-0 left-0 w-full h-full rounded-xl"></canvas>
                 </div>
-                <!-- The scratchable canvas is on top --><canvas id="scratch-card-canvas" class="absolute top-0 left-0 w-full h-full rounded-xl"></canvas>
 
                  <!-- Referral Section (Initially Hidden) -->
-                <div id="referral-section" class="hidden w-full mt-6 pt-6 border-t border-gray-600">
+                <div id="referral-section" class="hidden w-full p-4 pt-6 border-t border-gray-600">
                     <h4 class="text-lg font-bold text-white">Share for a bigger discount!</h4>
                     <p class="text-gray-400 text-sm mb-3">Share your link and your friends will get a better discount!</p>
                     <div class="relative flex items-center">
                         <input type="text" id="referral-link-display" readonly class="w-full bg-gray-800 border border-gray-600 text-gray-300 text-sm rounded-lg p-3 pr-24" value="">
-                        <button id="copy-link-btn" class="absolute right-1 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition-all">
+                        <button id="copy-link-btn" class="absolute right-1 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 text-white font-bold text-sm py-2 px-3 rounded-md transition-all">
                             Copy
                         </button>
                     </div>
