@@ -103,14 +103,27 @@
             <button id="close-modal-btn" class="absolute top-3 right-4 text-gray-500 hover:text-white text-4xl transition-colors">&times;</button>
             <h2 class="text-2xl font-bold text-red-500 mb-2">Congratulations!</h2>
             <p class="text-gray-400 mb-5">Scratch the card below to reveal your surprise!</p>
-            <div id="scratch-card-container" class="relative w-full h-48 md:h-56 rounded-xl flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800">
-                <!-- The revealed discount is under the canvas --><div id="result-text" class="text-center opacity-0">
+            <div id="scratch-card-container" class="relative w-full h-auto rounded-xl flex flex-col items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800 p-4">
+                <!-- The revealed discount is under the canvas --><div id="result-text" class="text-center opacity-0 h-48 md:h-56 flex flex-col justify-center">
                      <p class="text-lg text-gray-300 font-medium">You've won a</p>
                     <h3 class="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400 my-1"></h3>
                     <p class="text-sm text-gray-400 mt-2">Show this code to the cashier</p>
                     <p id="discount-code" class="mt-2 text-xl text-white font-mono tracking-widest bg-gray-700 px-4 py-2 rounded-lg inline-block border border-gray-600"></p>
                 </div>
                 <!-- The scratchable canvas is on top --><canvas id="scratch-card-canvas" class="absolute top-0 left-0 w-full h-full rounded-xl"></canvas>
+
+                 <!-- Referral Section (Initially Hidden) -->
+                <div id="referral-section" class="hidden w-full mt-6 pt-6 border-t border-gray-600">
+                    <h4 class="text-lg font-bold text-white">Share for a bigger discount!</h4>
+                    <p class="text-gray-400 text-sm mb-3">Share your link and your friends will get a better discount!</p>
+                    <div class="relative flex items-center">
+                        <input type="text" id="referral-link-display" readonly class="w-full bg-gray-800 border border-gray-600 text-gray-300 text-sm rounded-lg p-3 pr-24" value="">
+                        <button id="copy-link-btn" class="absolute right-1 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition-all">
+                            Copy
+                        </button>
+                    </div>
+                    <p id="copy-feedback" class="text-green-400 text-xs mt-2 h-4"></p>
+                </div>
             </div>
         </div>
     </div>
@@ -130,13 +143,13 @@
                         name: "Google Review",
                         description: "Leave us a review on Google",
                         icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" class="text-red-500"><path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12.5C5,8.75 8.36,5.73 12.19,5.73C15.19,5.73 17.55,6.82 17.55,6.82L19.43,5C19.43,5 17.55,3 12.19,3C6.42,3 2.03,7.8 2.03,12.5C2.03,17.2 6.42,22 12.19,22C17.6,22 21.7,18.35 21.7,12.91C21.7,12.16 21.55,11.6 21.35,11.1Z"/></svg>`,
-                        url: "https://maps.app.goo.gl/HJr1aVXAGctMAhz3A"
+                        url: "https://maps.app.goo.gl/SggpAD2sniLMkmeu6"
                     },
                     {
                         name: "Instagram Follow",
                         description: "Follow us on Instagram",
                         icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="stroke-red-500"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`,
-                        url: "https://www.instagram.com/banjos_jalgaon?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                        url: "https://www.instagram.com/hotelkhandeshwadajalgaon?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
                     }
                 ],
                 // How long (in hours) until a user can get a new card. 24 is recommended.
@@ -161,13 +174,36 @@
             const resultTextContainer = document.getElementById('result-text');
             const resultTextEl = document.querySelector('#result-text h3');
             const discountCodeEl = document.getElementById('discount-code');
+            const referralSection = document.getElementById('referral-section');
+            const referralLinkDisplay = document.getElementById('referral-link-display');
+            const copyLinkBtn = document.getElementById('copy-link-btn');
+            const copyFeedback = document.getElementById('copy-feedback');
 
             let tasksState = config.tasks.map(() => false);
-            let scratchImageData; // To store the initial state of the canvas
-            let pixelData; // To store pixel data for scratch progress calculation
-            let totalPixels; // Total number of pixels in the scratch layer
+            let scratchImageData, pixelData, totalPixels;
+
+            function handleReferral() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const refId = urlParams.get('ref');
+                if (refId) {
+                    // Mark this user as referred to give them a bonus
+                    localStorage.setItem('isReferred', 'true');
+                    // Clean the URL so the ref code isn't shared again
+                    history.replaceState(null, '', window.location.pathname);
+                }
+            }
+            
+            function getUserId() {
+                let userId = localStorage.getItem('userId');
+                if (!userId) {
+                    userId = Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
+                    localStorage.setItem('userId', userId);
+                }
+                return userId;
+            }
 
             function init() {
+                handleReferral();
                 const claimedData = getFromLocalStorage();
                 if (claimedData) {
                     document.getElementById('claimed-discount-code').textContent = claimedData.code;
@@ -184,10 +220,7 @@
                     const taskEl = document.createElement('div');
                     taskEl.className = 'task-item bg-gray-800/80 p-4 border border-gray-700 rounded-xl flex items-center justify-between transition-all hover:shadow-md hover:border-red-500 cursor-pointer';
                     
-                    // Lock all tasks except the first one initially
-                    if (index > 0) {
-                        taskEl.classList.add('task-item-locked');
-                    }
+                    if (index > 0) taskEl.classList.add('task-item-locked');
 
                     taskEl.innerHTML = `
                         <div class="flex items-center text-left flex-grow pointer-events-none">
@@ -199,71 +232,50 @@
                     tasksSection.appendChild(taskEl);
 
                     taskEl.addEventListener('click', (e) => {
-                        // Prevent interaction if the task is locked
-                        if (taskEl.classList.contains('task-item-locked')) {
-                            return;
-                        }
-
+                        if (taskEl.classList.contains('task-item-locked')) return;
                         const checkbox = taskEl.querySelector('input[type="checkbox"]');
-                        
-                        // If the checkbox was disabled, enable it.
                         if (checkbox.disabled) {
                             checkbox.disabled = false;
                             checkbox.classList.remove('cursor-not-allowed');
                             checkbox.classList.add('cursor-pointer');
                         }
-
-                        // Only open the link if the user is not clicking the (now enabled) checkbox itself.
                         if (e.target.type !== 'checkbox') {
                             window.open(task.url, '_blank');
                         }
                     });
                 });
 
-                document.querySelectorAll('#tasks-section input[type="checkbox"]').forEach(cb => {
-                    cb.addEventListener('change', handleCheckboxChange);
-                });
-                
+                document.querySelectorAll('#tasks-section input[type="checkbox"]').forEach(cb => cb.addEventListener('change', handleCheckboxChange));
                 getCardBtn.addEventListener('click', showScratchModal);
                 closeModalBtn.addEventListener('click', hideScratchModal);
+                copyLinkBtn.addEventListener('click', copyReferralLink);
             }
 
             function handleCheckboxChange(event) {
                 const index = parseInt(event.target.dataset.index);
                 const isChecked = event.target.checked;
                 tasksState[index] = isChecked;
-                const taskItem = event.target.closest('.task-item');
-                taskItem.classList.toggle('task-item-completed', event.target.checked);
+                event.target.closest('.task-item').classList.toggle('task-item-completed', isChecked);
 
                 const allTaskItems = document.querySelectorAll('.task-item');
-
-                // Unlock the next task OR re-lock all subsequent tasks
                 if (isChecked) {
                     const nextTaskItem = allTaskItems[index + 1];
-                    if (nextTaskItem) {
-                        nextTaskItem.classList.remove('task-item-locked');
-                    }
+                    if (nextTaskItem) nextTaskItem.classList.remove('task-item-locked');
                 } else {
-                    // A task was unchecked, so re-lock all tasks that come after it
                     for (let i = index + 1; i < allTaskItems.length; i++) {
                         const itemToLock = allTaskItems[i];
                         const checkboxToLock = itemToLock.querySelector('input[type="checkbox"]');
-                        
                         itemToLock.classList.add('task-item-locked');
-                        itemToLock.classList.remove('task-item-completed'); // Visually un-complete it
-
+                        itemToLock.classList.remove('task-item-completed');
                         if (checkboxToLock.checked) {
-                            checkboxToLock.checked = false; // Uncheck it
-                            tasksState[i] = false; // Update state array
+                            checkboxToLock.checked = false;
+                            tasksState[i] = false;
                         }
-
-                        // Re-disable the checkbox
                         checkboxToLock.disabled = true;
                         checkboxToLock.classList.add('cursor-not-allowed');
                         checkboxToLock.classList.remove('cursor-pointer');
                     }
                 }
-
                 checkAllTasksCompleted();
             }
 
@@ -289,62 +301,53 @@
                 scratchModalOverlay.classList.remove('modal-show');
                 scratchCardSection.classList.remove('modal-content-show');
                 mainContent.classList.remove('no-scroll');
-                // Reset scratch card state if needed for re-opening
                 canvas.classList.remove('hidden-scratch');
                 resultTextContainer.classList.add('opacity-0');
                 resultTextContainer.classList.remove('result-reveal');
+                referralSection.classList.add('hidden');
             }
 
-            function generateDiscount() {
-                const discount = Math.floor(Math.random() * 10) + 1; // 1 to 10
+            function generateDiscount(isReferred) {
+                // Discount is capped at 5% for everyone
+                const discount = Math.floor(Math.random() * 5) + 1; // 1% to 5%
+
                 const uniquePart = Date.now().toString(36).slice(-4).toUpperCase();
                 const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
-                const code = `PROMO-${uniquePart}${randomPart}`; // e.g., PROMO-KMPM4F8A
+                const code = `PROMO-${uniquePart}${randomPart}`;
                 return { discount, code };
             }
 
             function setupScratchCard() {
-                const { discount, code } = generateDiscount();
+                const isReferred = localStorage.getItem('isReferred') === 'true';
+                const { discount, code } = generateDiscount(isReferred);
                 resultTextEl.textContent = `${discount}% OFF`;
                 discountCodeEl.textContent = code;
                 saveToLocalStorage({ discount, code, timestamp: Date.now() });
+                if(isReferred) localStorage.removeItem('isReferred'); // Use the bonus once
 
                 const rect = canvas.getBoundingClientRect();
                 canvas.width = rect.width;
                 canvas.height = rect.height;
                 
-                // Draw the top, scratchable layer on the canvas
                 ctx.globalCompositeOperation = 'source-over';
                 
-                // Create a texture pattern for the scratch layer
                 const patternCanvas = document.createElement('canvas');
                 const patternCtx = patternCanvas.getContext('2d');
-                patternCanvas.width = 10;
-                patternCanvas.height = 10;
-                patternCtx.fillStyle = '#374151'; // background color (gray-700)
+                patternCanvas.width = 10; patternCanvas.height = 10;
+                patternCtx.fillStyle = '#374151';
                 patternCtx.fillRect(0, 0, 10, 10);
-                patternCtx.fillStyle = '#4b5563'; // dot color (gray-600)
-                patternCtx.beginPath();
-                patternCtx.arc(2.5, 2.5, 1.5, 0, 2 * Math.PI);
-                patternCtx.fill();
-                patternCtx.beginPath();
-                patternCtx.arc(7.5, 7.5, 1.5, 0, 2 * Math.PI);
-                patternCtx.fill();
+                patternCtx.fillStyle = '#4b5563';
+                patternCtx.beginPath(); patternCtx.arc(2.5, 2.5, 1.5, 0, 2 * Math.PI); patternCtx.fill();
+                patternCtx.beginPath(); patternCtx.arc(7.5, 7.5, 1.5, 0, 2 * Math.PI); patternCtx.fill();
                 const pattern = ctx.createPattern(patternCanvas, 'repeat');
                 ctx.fillStyle = pattern;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                // Add text on top of the scratchable layer
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
                 ctx.font = '700 1.25rem Inter';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('Scratch Here to Reveal!', canvas.width / 2, canvas.height / 2);
-
-                // Store initial canvas state for scratch detection
-                scratchImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                pixelData = scratchImageData.data;
-                totalPixels = pixelData.length / 4; // Each pixel has R, G, B, A components
 
                 let isDrawing = false;
                 let confettiFired = false;
@@ -357,20 +360,31 @@
                     const clientY = event.touches ? event.touches[0].clientY : event.clientY;
                     return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
                 }
+                
+                function revealCard() {
+                    if (confettiFired) return;
+                    resultTextContainer.classList.remove('opacity-0');
+                    resultTextContainer.classList.add('result-reveal');
+                    confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+                    canvas.classList.add('hidden-scratch');
+                    
+                    // Show referral link section
+                    const userId = getUserId();
+                    const referralLink = `${window.location.origin}${window.location.pathname}?ref=${userId}`;
+                    referralLinkDisplay.value = referralLink;
+                    referralSection.classList.remove('hidden');
+
+                    confettiFired = true;
+                }
 
                 function getScratchedPercentage() {
                     let scratchedPixels = 0;
-                    // Re-get image data after scratching
                     const currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const currentPixelData = currentImageData.data;
-
                     for (let i = 0; i < currentPixelData.length; i += 4) {
-                        // Check the alpha channel: 0 means fully transparent (scratched)
-                        if (currentPixelData[i + 3] === 0) {
-                            scratchedPixels++;
-                        }
+                        if (currentPixelData[i + 3] === 0) scratchedPixels++;
                     }
-                    return scratchedPixels / totalPixels;
+                    return scratchedPixels / (currentImageData.width * currentImageData.height);
                 }
 
                 function scratch(e) {
@@ -379,41 +393,49 @@
                     const pos = getEventPosition(e);
                     ctx.globalCompositeOperation = 'destination-out';
                     ctx.beginPath();
-                    ctx.arc(pos.x, pos.y, 30, 0, Math.PI * 2); // Slightly larger brush
+                    ctx.arc(pos.x, pos.y, 30, 0, Math.PI * 2);
                     ctx.fill();
 
-                    const scratched = getScratchedPercentage();
-                    if (scratched > config.revealThreshold && !confettiFired) {
-                        resultTextContainer.classList.remove('opacity-0');
-                        resultTextContainer.classList.add('result-reveal');
-                        confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
-                        canvas.classList.add('hidden-scratch'); // Completely fade out scratch layer
-                        confettiFired = true;
+                    if (getScratchedPercentage() > config.revealThreshold) {
+                        revealCard();
                     }
                 }
 
                 function startScratch(e) { 
                     isDrawing = true; 
-                    // Prevent default for touch events to stop scrolling
                     if (e.type === 'touchstart') e.preventDefault();
                     scratch(e); 
                 }
                 
                 function stopScratch() {
                     isDrawing = false;
-                    // If scratching stopped but not enough to trigger, check one last time
-                    if (!confettiFired && getScratchedPercentage() > config.revealThreshold * 0.5) { // Lower threshold for auto-reveal if user stops mid-way
-                         resultTextContainer.classList.remove('opacity-0');
-                        resultTextContainer.classList.add('result-reveal');
-                        confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
-                        canvas.classList.add('hidden-scratch'); // Completely fade out scratch layer
-                        confettiFired = true;
+                    if (!confettiFired && getScratchedPercentage() > config.revealThreshold * 0.5) {
+                        revealCard();
                     }
                 }
                 
                 ['mousedown', 'touchstart'].forEach(evt => canvas.addEventListener(evt, startScratch, { passive: false }));
                 ['mousemove', 'touchmove'].forEach(evt => canvas.addEventListener(evt, scratch, { passive: false }));
                 ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(evt => canvas.addEventListener(evt, stopScratch));
+            }
+            
+            function copyReferralLink() {
+                // Fallback for older browsers/secure contexts
+                const textArea = document.createElement("textarea");
+                textArea.value = referralLinkDisplay.value;
+                textArea.style.position = "fixed"; // Avoid scrolling to bottom
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    copyFeedback.textContent = 'Copied to clipboard!';
+                } catch (err) {
+                    copyFeedback.textContent = 'Failed to copy!';
+                }
+                document.body.removeChild(textArea);
+                
+                setTimeout(() => { copyFeedback.textContent = ''; }, 2000);
             }
 
             function saveToLocalStorage(data) { localStorage.setItem('discountData', JSON.stringify(data)); }
