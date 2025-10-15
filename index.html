@@ -154,11 +154,13 @@
     </div>
     
     <!-- Final Discount Modal for User A -->
-    <div id="final-discount-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center p-4 text-center">
-        <h2 class="text-4xl font-bold text-white mb-4">Your Final Discount Is...</h2>
-        <div id="final-discount-animation" class="text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-yellow-400 to-red-500 mb-6">0%</div>
-        <p id="final-discount-code" class="text-2xl font-mono bg-gray-800 text-red-300 px-6 py-3 rounded-lg border border-gray-700"></p>
-        <p class="text-gray-400 mt-6">Show this code to the cashier.</p>
+    <div id="final-discount-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 text-center">
+        <div id="final-discount-card" class="bg-gray-900 rounded-3xl p-8 shadow-2xl w-full max-w-sm">
+            <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">Your Final Discount Is...</h2>
+            <div id="final-discount-animation" class="text-7xl sm:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-yellow-400 to-red-500 my-4">0%</div>
+            <p id="final-discount-code" class="text-xl sm:text-2xl font-mono bg-gray-800 text-red-300 px-6 py-3 rounded-lg border border-gray-700 inline-block"></p>
+            <p class="text-gray-400 mt-6 text-sm">Show this code to the cashier.</p>
+        </div>
     </div>
 
 
@@ -217,6 +219,7 @@
                 copyLinkBtn: document.getElementById('copy-link-btn'),
                 copyFeedback: document.getElementById('copy-feedback'),
                 finalDiscountModal: document.getElementById('final-discount-modal'),
+                finalDiscountCard: document.getElementById('final-discount-card'),
                 finalDiscountAnimation: document.getElementById('final-discount-animation'),
                 finalDiscountCode: document.getElementById('final-discount-code'),
             };
@@ -391,7 +394,9 @@
 
                 hideScratchModal();
                 elements.finalDiscountModal.classList.remove('hidden');
-                
+                elements.finalDiscountModal.classList.add('modal-show');
+                elements.finalDiscountCard.classList.add('result-reveal');
+
                 const animationDuration = 1500;
                 let frame = 0;
                 const totalFrames = Math.round(animationDuration / (1000/60));
@@ -588,5 +593,4 @@
     </script>
 </body>
 </html>
-
 
