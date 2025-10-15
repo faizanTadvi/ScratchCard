@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Get Your Discount! - Banjo Cafe</title>
+    <title>Get Your Discount! - Khandesh Wada</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Add confetti library --><script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,71 +17,79 @@
         #main-content.no-scroll {
              touch-action: none;
         }
-        /* Custom styles for the scratch card canvas */
         #scratch-card-canvas {
             cursor: grabbing;
-            border-radius: 0.75rem; /* 12px */
-            transition: opacity 0.3s ease-out; /* Smooth fade out */
+            border-radius: 0.75rem;
+            transition: opacity 0.3s ease-out;
         }
         #scratch-card-canvas.hidden-scratch {
             opacity: 0;
-            pointer-events: none; /* Make it unclickable when hidden */
+            pointer-events: none;
         }
-        .task-item-completed {
-            opacity: 0.5;
-        }
-        .task-item-completed .task-description {
-            text-decoration: line-through;
-        }
-        /* Animation for modal popup */
-        .modal-show {
-            animation: fadeIn 0.3s ease-out forwards;
-        }
-        .modal-content-show {
-             animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        /* Animation for result reveal */
-        .result-reveal {
-            animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(100%); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes popIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        /* Style for locked tasks */
+        .task-item-completed { opacity: 0.5; }
+        .task-item-completed .task-description { text-decoration: line-through; }
+        .modal-show { animation: fadeIn 0.3s ease-out forwards; }
+        .modal-content-show { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .result-reveal { animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .task-item-locked {
             opacity: 0.6;
-            cursor: not-allowed !important; /* Force cursor */
-            background-color: #1f2937; /* gray-800 */
+            cursor: not-allowed !important;
+            background-color: #1f2937;
         }
-        .task-item-locked:hover {
-            border-color: #374151; /* gray-700, no special hover effect */
-            box-shadow: none;
+        .task-item-locked:hover { border-color: #374151; box-shadow: none; }
+        /* Final Discount Animation */
+        .counter-animate {
+            animation: counter-pop 0.4s ease-in-out;
+        }
+        @keyframes counter-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.25) rotate(5deg); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
     <div id="main-content" class="w-full max-w-md mx-auto bg-gray-950/70 backdrop-blur-xl rounded-3xl shadow-2xl shadow-red-800/20 p-5 sm:p-6 md:p-8 text-center transition-all duration-500">
+        
+        <div id="loading-spinner" class="hidden text-white">Loading...</div>
+        
+        <!-- User Details Section (Initially visible) -->
+        <div id="user-details-section" class="hidden">
+            <img id="logo-top" src="kw.PNG" alt="Cafe Logo" class="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 rounded-full shadow-lg border-4 border-white">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-100">Welcome!</h1>
+            <p class="text-gray-400 mt-2 mb-6 text-base sm:text-lg">Enter your details to begin.</p>
+            <form id="user-details-form" class="space-y-4 text-left">
+                <div>
+                    <label for="user-name" class="block text-sm font-medium text-gray-300 mb-1">Name</label>
+                    <input type="text" id="user-name" name="name" required class="w-full bg-gray-800 border border-gray-600 text-gray-200 rounded-lg p-3 focus:ring-red-500 focus:border-red-500">
+                </div>
+                <div>
+                    <label for="user-contact" class="block text-sm font-medium text-gray-300 mb-1">Contact Number</label>
+                    <input type="tel" id="user-contact" name="contact" required pattern="[0-9]{10}" title="Please enter a 10-digit contact number" class="w-full bg-gray-800 border border-gray-600 text-gray-200 rounded-lg p-3 focus:ring-red-500 focus:border-red-500">
+                </div>
+                <div>
+                    <label for="table-number" class="block text-sm font-medium text-gray-300 mb-1">Table Number</label>
+                    <input type="number" id="table-number" name="table" required class="w-full bg-gray-800 border border-gray-600 text-gray-200 rounded-lg p-3 focus:ring-red-500 focus:border-red-500">
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-br from-red-600 to-red-800 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-lg !mt-6">
+                    Continue
+                </button>
+            </form>
+        </div>
 
-        <!-- Header Section --><header id="header-section">
+        <header id="header-section" class="hidden">
             <img id="logo" src="kw.PNG" alt="Cafe Logo" class="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 rounded-full shadow-lg border-4 border-white">
             <h1 id="restaurant-name" class="text-3xl sm:text-4xl font-bold text-gray-100">Restaurant Name</h1>
             <p class="text-gray-400 mt-2 text-base sm:text-lg">Complete a couple of tasks to unlock a surprise discount!</p>
         </header>
 
-        <!-- Tasks Section --><div id="tasks-section" class="mt-8 space-y-3">
-            <!-- Tasks will be dynamically inserted here --></div>
+        <div id="tasks-section" class="hidden mt-8 space-y-3"></div>
         
-        <!-- Get Card Button Section (Initially hidden) --><div id="get-card-button-section" class="hidden mt-8">
+        <div id="get-card-button-section" class="hidden mt-8">
             <h2 class="text-2xl font-bold text-red-500 mb-2">Tasks Complete!</h2>
             <p class="text-gray-300 mb-6">You've unlocked your reward. Click below to claim it!</p>
             <button id="get-card-btn" class="bg-gradient-to-br from-red-600 to-red-800 text-white font-bold py-3 px-8 sm:py-4 sm:px-10 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-lg w-full sm:w-auto">
@@ -89,260 +97,381 @@
             </button>
         </div>
         
-        <!-- Already Claimed Section (Initially Hidden) --><div id="already-claimed-section" class="hidden mt-8 text-center">
+        <div id="already-claimed-section" class="hidden mt-8 text-center">
             <h2 class="text-2xl font-bold text-red-500 mb-2">Welcome Back!</h2>
-            <p class="text-gray-300 mb-4">You've already claimed a discount recently. Here's your code:</p>
+            <p class="text-gray-300 mb-4">You've already claimed a discount today. Here's your code:</p>
             <p id="claimed-discount-code" class="text-2xl font-mono bg-gray-800 text-red-300 px-6 py-3 rounded-lg inline-block border border-gray-700"></p>
-            <p class="text-sm text-gray-400 mt-4">This code is valid for 24 hours.</p>
         </div>
-
     </div>
     
-    <!-- Scratch Card Modal (Initially Hidden) --><div id="scratch-modal-overlay" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4">
+    <div id="scratch-modal-overlay" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4">
         <div id="scratch-card-section" class="bg-gray-900 rounded-3xl shadow-2xl p-5 sm:p-6 md:p-8 text-center w-full max-w-md relative">
             <button id="close-modal-btn" class="absolute top-3 right-4 text-gray-500 hover:text-white text-4xl transition-colors">&times;</button>
             <h2 class="text-2xl font-bold text-red-500 mb-2">Congratulations!</h2>
             <p class="text-gray-400 mb-5">Scratch the card below to reveal your surprise!</p>
             <div id="scratch-card-container" class="w-full rounded-xl flex flex-col items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800">
                 <div id="scratch-area" class="relative w-full h-40 sm:h-48 md:h-56">
-                    <!-- The revealed discount is under the canvas -->
                     <div id="result-text" class="absolute inset-0 flex flex-col items-center justify-center text-center opacity-0 p-2">
                         <p class="text-lg text-gray-300 font-medium">You've won a</p>
-                        <h3 class="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400 my-1"></h3>
-                        <p class="text-sm text-gray-400 mt-2">Show this code to the cashier</p>
-                        <p id="discount-code" class="mt-2 text-xl text-white font-mono tracking-widest bg-gray-700 px-4 py-2 rounded-lg inline-block border border-gray-600"></p>
+                        <h3 id="initial-discount-display" class="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400 my-1"></h3>
                     </div>
-                    <!-- The scratchable canvas is on top -->
                     <canvas id="scratch-card-canvas" class="absolute top-0 left-0 w-full h-full rounded-xl"></canvas>
                 </div>
+                
+                <div id="bonus-section" class="hidden w-full p-4 pt-5 text-center">
+                    <p class="text-gray-300">Referral Bonus: 
+                        <span id="referral-bonus-display" class="font-bold text-lg text-green-400">+0%</span>
+                    </p>
+                    <button id="claim-final-btn" class="w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-lg transition-all">
+                        Claim Final Discount
+                    </button>
+                </div>
 
-                 <!-- Referral Section (Initially Hidden) -->
                 <div id="referral-section" class="hidden w-full p-4 pt-6 border-t border-gray-600">
-                    <h4 class="text-lg font-bold text-white">Share for a bigger discount!</h4>
-                    <p class="text-gray-400 text-sm mb-3">Share your link and your friends will get a better discount!</p>
+                    <h4 class="text-lg font-bold text-white">Share for more discount!</h4>
+                    <p class="text-gray-400 text-sm mb-3">Get +0.5% for each friend who completes the tasks!</p>
                     <div class="relative flex items-center">
                         <input type="text" id="referral-link-display" readonly class="w-full bg-gray-800 border border-gray-600 text-gray-300 text-sm rounded-lg p-3 pr-24" value="">
-                        <button id="copy-link-btn" class="absolute right-1 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 text-white font-bold text-sm py-2 px-3 rounded-md transition-all">
-                            Copy
-                        </button>
+                        <button id="copy-link-btn" class="absolute right-1 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 text-white font-bold text-sm py-2 px-3 rounded-md transition-all">Copy</button>
                     </div>
                     <p id="copy-feedback" class="text-green-400 text-xs mt-2 h-4"></p>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- Final Discount Modal -->
+    <div id="final-discount-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center p-4 text-center">
+        <h2 class="text-4xl font-bold text-white mb-4">Your Final Discount Is...</h2>
+        <div id="final-discount-animation" class="text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-yellow-400 to-red-500 mb-6">0%</div>
+        <p id="final-discount-code" class="text-2xl font-mono bg-gray-800 text-red-300 px-6 py-3 rounded-lg border border-gray-700"></p>
+        <p class="text-gray-400 mt-6">Show this code to the cashier.</p>
+    </div>
 
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        document.addEventListener('DOMContentLoaded', async () => {
             // =================================================================
-            // === CONFIGURATION: Edit these values for each restaurant ===
+            // PASTE YOUR FIREBASE CONFIGURATION HERE
             // =================================================================
-            const config = {
-                restaurantName: "Hotel Khandesh Wada",
-                 logoUrl: "kw.PNG", // Placeholder Logo
-                tasks: [
-                    {
-                        name: "Google Review",
-                        description: "Leave us a review on Google",
-                        icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" class="text-red-500"><path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12.5C5,8.75 8.36,5.73 12.19,5.73C15.19,5.73 17.55,6.82 17.55,6.82L19.43,5C19.43,5 17.55,3 12.19,3C6.42,3 2.03,7.8 2.03,12.5C2.03,17.2 6.42,22 12.19,22C17.6,22 21.7,18.35 21.7,12.91C21.7,12.16 21.55,11.6 21.35,11.1Z"/></svg>`,
-                        url: "https://maps.app.goo.gl/SggpAD2sniLMkmeu6"
-                    },
-                    {
-                        name: "Instagram Follow",
-                        description: "Follow us on Instagram",
-                        icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="stroke-red-500"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`,
-                        url: "https://www.instagram.com/hotelkhandeshwadajalgaon?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
-                    }
-                ],
-                // How long (in hours) until a user can get a new card. 24 is recommended.
-                cooldownHours: 0,
-                // Threshold for revealing and triggering confetti (0.0 to 1.0, e.g., 0.7 for 70%)
-                revealThreshold: 0.3
+            const firebaseConfig = {
+                apiKey: "AIzaSyA1Ln95FA7TLhZRFPjk76mRgfzGtKGy71k",
+                authDomain: "scratchcard-e789d.firebaseapp.com",
+                projectId: "scratchcard-e789d",
+                storageBucket: "scratchcard-e789d.appspot.com",
+                messagingSenderId: "1020798468185",
+                appId: "1:1020798468185:web:21d8ded5ca4ccc0842f148"
             };
             // =================================================================
-            // === End of Configuration ===
-            // =================================================================
-            const mainContent = document.getElementById('main-content');
-            const tasksSection = document.getElementById('tasks-section');
-            const getCardButtonSection = document.getElementById('get-card-button-section');
-            const getCardBtn = document.getElementById('get-card-btn');
-            const scratchModalOverlay = document.getElementById('scratch-modal-overlay');
-            const scratchCardSection = document.getElementById('scratch-card-section');
-            const closeModalBtn = document.getElementById('close-modal-btn');
-            const alreadyClaimedSection = document.getElementById('already-claimed-section');
-            const headerSection = document.getElementById('header-section');
-            const canvas = document.getElementById('scratch-card-canvas');
-            const ctx = canvas.getContext('2d');
-            const resultTextContainer = document.getElementById('result-text');
-            const resultTextEl = document.querySelector('#result-text h3');
-            const discountCodeEl = document.getElementById('discount-code');
-            const referralSection = document.getElementById('referral-section');
-            const referralLinkDisplay = document.getElementById('referral-link-display');
-            const copyLinkBtn = document.getElementById('copy-link-btn');
-            const copyFeedback = document.getElementById('copy-feedback');
 
+            const config = {
+                restaurantName: "Hotel Khandesh Wada",
+                 logoUrl: "kw.PNG",
+                tasks: [
+                    { name: "Google Review", description: "Leave us a review on Google", icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" class="text-red-500"><path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12.5C5,8.75 8.36,5.73 12.19,5.73C15.19,5.73 17.55,6.82 17.55,6.82L19.43,5C19.43,5 17.55,3 12.19,3C6.42,3 2.03,7.8 2.03,12.5C2.03,17.2 6.42,22 12.19,22C17.6,22 21.7,18.35 21.7,12.91C21.7,12.16 21.55,11.6 21.35,11.1Z"/></svg>`, url: "https://maps.app.goo.gl/SggpAD2sniLMkmeu6" },
+                    { name: "Instagram Follow", description: "Follow us on Instagram", icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="stroke-red-500"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`, url: "https://www.instagram.com/hotelkhandeshwadajalgaon?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" }
+                ],
+                cooldownHours: 24,
+                revealThreshold: 0.3 // Reveal after 30% is scratched
+            };
+
+            const elements = {
+                mainContent: document.getElementById('main-content'),
+                loadingSpinner: document.getElementById('loading-spinner'),
+                userDetailsSection: document.getElementById('user-details-section'),
+                userDetailsForm: document.getElementById('user-details-form'),
+                tasksSection: document.getElementById('tasks-section'),
+                getCardButtonSection: document.getElementById('get-card-button-section'),
+                getCardBtn: document.getElementById('get-card-btn'),
+                alreadyClaimedSection: document.getElementById('already-claimed-section'),
+                headerSection: document.getElementById('header-section'),
+                scratchModalOverlay: document.getElementById('scratch-modal-overlay'),
+                closeModalBtn: document.getElementById('close-modal-btn'),
+                canvas: document.getElementById('scratch-card-canvas'),
+                resultText: document.getElementById('result-text'),
+                initialDiscountDisplay: document.getElementById('initial-discount-display'),
+                bonusSection: document.getElementById('bonus-section'),
+                referralBonusDisplay: document.getElementById('referral-bonus-display'),
+                claimFinalBtn: document.getElementById('claim-final-btn'),
+                referralSection: document.getElementById('referral-section'),
+                referralLinkDisplay: document.getElementById('referral-link-display'),
+                copyLinkBtn: document.getElementById('copy-link-btn'),
+                copyFeedback: document.getElementById('copy-feedback'),
+                finalDiscountModal: document.getElementById('final-discount-modal'),
+                finalDiscountAnimation: document.getElementById('final-discount-animation'),
+                finalDiscountCode: document.getElementById('final-discount-code'),
+            };
+            
+            let db, auth;
             let tasksState = config.tasks.map(() => false);
-            let scratchImageData, pixelData, totalPixels;
+            let currentUserData = null;
+            let unsubscribeUser;
 
-            function handleReferral() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const refId = urlParams.get('ref');
-                if (refId) {
-                    // Mark this user as referred to give them a bonus
-                    localStorage.setItem('isReferred', 'true');
-                    // Clean the URL so the ref code isn't shared again
-                    history.replaceState(null, '', window.location.pathname);
+            async function initFirebase() {
+                try {
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+                    await signInAnonymously(auth);
+                    return true;
+                } catch (error) {
+                    console.error("Firebase Init Error:", error);
+                    if (error.code === 'auth/configuration-not-found') {
+                         elements.loadingSpinner.innerHTML = "Configuration Error: Please enable Anonymous Authentication in your Firebase project's console.";
+                    } else {
+                        elements.loadingSpinner.innerText = "Could not connect to Firebase. Please check the console for errors.";
+                    }
+                    return false;
                 }
             }
             
-            function getUserId() {
-                let userId = localStorage.getItem('userId');
-                if (!userId) {
-                    userId = Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
-                    localStorage.setItem('userId', userId);
-                }
-                return userId;
+            function getUserIdFromStorage() { return localStorage.getItem('userId'); }
+            function setUserIdInStorage(id) { localStorage.setItem('userId', id); }
+
+            async function getUserData(userId) {
+                const userRef = doc(db, 'users', userId);
+                const userSnap = await getDoc(userRef);
+                return userSnap.exists() ? userSnap.data() : null;
             }
 
-            function init() {
-                handleReferral();
-                const claimedData = getFromLocalStorage();
-                if (claimedData) {
-                    document.getElementById('claimed-discount-code').textContent = claimedData.code;
-                    headerSection.classList.add('hidden');
-                    tasksSection.classList.add('hidden');
-                    alreadyClaimedSection.classList.remove('hidden');
+            function showScreen(screen) {
+                ['loadingSpinner', 'userDetailsSection', 'headerSection', 'tasksSection', 'alreadyClaimedSection'].forEach(s => {
+                    if (elements[s]) { elements[s].classList.add('hidden'); }
+                });
+                if (elements[screen]) { elements[screen].classList.remove('hidden'); }
+            }
+
+            async function init() {
+                showScreen('loadingSpinner');
+                const firebaseReady = await initFirebase();
+                if (!firebaseReady) {
                     return;
                 }
 
+                const userId = getUserIdFromStorage();
+                const urlParams = new URLSearchParams(window.location.search);
+                const referrerId = urlParams.get('ref');
+
+                if (referrerId) {
+                    localStorage.setItem('referrerId', referrerId);
+                    history.replaceState(null, '', window.location.pathname);
+                }
+
+                if (userId) {
+                    currentUserData = await getUserData(userId);
+                    if (currentUserData && currentUserData.createdAt) {
+                        const hoursSinceCreated = (Date.now() - currentUserData.createdAt.toDate()) / 3600000;
+                        if (hoursSinceCreated > config.cooldownHours) {
+                             localStorage.removeItem('userId');
+                             showScreen('userDetailsSection');
+                        } else if (currentUserData.claimed) {
+                            elements.claimedDiscountCode.textContent = currentUserData.discountCode;
+                            showScreen('alreadyClaimedSection');
+                        } else {
+                            showMainAppFlow();
+                        }
+                    } else {
+                        localStorage.removeItem('userId');
+                        showScreen('userDetailsSection');
+                    }
+                } else {
+                    showScreen('userDetailsSection');
+                }
+                
+                elements.userDetailsForm.addEventListener('submit', handleUserSubmit);
+                elements.getCardBtn.addEventListener('click', showScratchModal);
+                elements.closeModalBtn.addEventListener('click', hideScratchModal);
+                elements.copyLinkBtn.addEventListener('click', copyReferralLink);
+                elements.claimFinalBtn.addEventListener('click', handleClaimFinalDiscount);
+            }
+
+            async function handleUserSubmit(e) {
+                e.preventDefault();
+                const userName = document.getElementById('user-name').value;
+                const userContact = document.getElementById('user-contact').value;
+                const tableNumber = document.getElementById('table-number').value;
+
+                const userId = userContact;
+                setUserIdInStorage(userId);
+                
+                const userRef = doc(db, 'users', userId);
+                currentUserData = {
+                    name: userName,
+                    contact: userContact,
+                    table: tableNumber,
+                    referralBonus: 0,
+                    claimed: false,
+                    createdAt: serverTimestamp()
+                };
+                
+                const referrerId = localStorage.getItem('referrerId');
+                if (referrerId) {
+                    currentUserData.referrerId = referrerId;
+                }
+
+                await setDoc(userRef, currentUserData);
+                showMainAppFlow();
+            }
+            
+            function showMainAppFlow() {
+                showScreen('headerSection');
+                elements.tasksSection.classList.remove('hidden');
+                buildTasks();
+            }
+
+            function buildTasks() {
+                elements.tasksSection.innerHTML = '';
                 document.getElementById('restaurant-name').textContent = config.restaurantName;
-                if(config.logoUrl) document.getElementById('logo').src = config.logoUrl;
+                document.getElementById('logo').src = config.logoUrl;
+                document.getElementById('logo-top').src = config.logoUrl;
 
                 config.tasks.forEach((task, index) => {
                     const taskEl = document.createElement('div');
                     taskEl.className = 'task-item bg-gray-800/80 p-4 border border-gray-700 rounded-xl flex items-center justify-between transition-all hover:shadow-md hover:border-red-500 cursor-pointer';
-                    
                     if (index > 0) taskEl.classList.add('task-item-locked');
-
                     taskEl.innerHTML = `
                         <div class="flex items-center text-left flex-grow pointer-events-none">
                             <div class="mr-4">${task.icon}</div>
                             <span class="text-gray-200 font-medium task-description">${task.description}</span>
                         </div>
-                        <input type="checkbox" data-index="${index}" class="h-6 w-6 rounded-md border-gray-600 text-red-600 focus:ring-red-500 cursor-not-allowed" disabled>
-                    `;
-                    tasksSection.appendChild(taskEl);
-
+                        <input type="checkbox" data-index="${index}" class="h-6 w-6 rounded-md border-gray-600 text-red-600 focus:ring-red-500 cursor-not-allowed" disabled>`;
+                    elements.tasksSection.appendChild(taskEl);
                     taskEl.addEventListener('click', (e) => {
                         if (taskEl.classList.contains('task-item-locked')) return;
                         const checkbox = taskEl.querySelector('input[type="checkbox"]');
                         if (checkbox.disabled) {
                             checkbox.disabled = false;
                             checkbox.classList.remove('cursor-not-allowed');
-                            checkbox.classList.add('cursor-pointer');
                         }
-                        if (e.target.type !== 'checkbox') {
-                            window.open(task.url, '_blank');
-                        }
+                        if (e.target.type !== 'checkbox') window.open(task.url, '_blank');
                     });
                 });
-
                 document.querySelectorAll('#tasks-section input[type="checkbox"]').forEach(cb => cb.addEventListener('change', handleCheckboxChange));
-                getCardBtn.addEventListener('click', showScratchModal);
-                closeModalBtn.addEventListener('click', hideScratchModal);
-                copyLinkBtn.addEventListener('click', copyReferralLink);
             }
-
+            
             function handleCheckboxChange(event) {
                 const index = parseInt(event.target.dataset.index);
-                const isChecked = event.target.checked;
-                tasksState[index] = isChecked;
-                event.target.closest('.task-item').classList.toggle('task-item-completed', isChecked);
-
+                tasksState[index] = event.target.checked;
+                event.target.closest('.task-item').classList.toggle('task-item-completed', event.target.checked);
+                
                 const allTaskItems = document.querySelectorAll('.task-item');
-                if (isChecked) {
+                if (event.target.checked) {
                     const nextTaskItem = allTaskItems[index + 1];
                     if (nextTaskItem) nextTaskItem.classList.remove('task-item-locked');
                 } else {
                     for (let i = index + 1; i < allTaskItems.length; i++) {
-                        const itemToLock = allTaskItems[i];
-                        const checkboxToLock = itemToLock.querySelector('input[type="checkbox"]');
-                        itemToLock.classList.add('task-item-locked');
-                        itemToLock.classList.remove('task-item-completed');
-                        if (checkboxToLock.checked) {
-                            checkboxToLock.checked = false;
-                            tasksState[i] = false;
-                        }
-                        checkboxToLock.disabled = true;
-                        checkboxToLock.classList.add('cursor-not-allowed');
-                        checkboxToLock.classList.remove('cursor-pointer');
+                         allTaskItems[i].classList.add('task-item-locked');
                     }
                 }
-                checkAllTasksCompleted();
-            }
-
-            function checkAllTasksCompleted() {
-                if (tasksState.every(status => status === true)) {
+                
+                if (tasksState.every(s => s === true)) {
                     setTimeout(() => {
-                        tasksSection.classList.add('hidden');
-                        getCardButtonSection.classList.remove('hidden');
+                        elements.tasksSection.classList.add('hidden');
+                        elements.getCardButtonSection.classList.remove('hidden');
                     }, 500);
                 }
             }
-            
-            function showScratchModal() {
-                scratchModalOverlay.classList.remove('hidden');
-                scratchModalOverlay.classList.add('modal-show');
-                scratchCardSection.classList.add('modal-content-show');
-                mainContent.classList.add('no-scroll');
-                setupScratchCard();
+
+            async function showScratchModal() {
+                elements.scratchModalOverlay.classList.remove('hidden');
+                await setupScratchCard();
+
+                const referrerId = localStorage.getItem('referrerId');
+                if (referrerId) {
+                    const referrerRef = doc(db, 'users', referrerId);
+                    try {
+                        await updateDoc(referrerRef, { referralBonus: increment(0.5) });
+                        localStorage.removeItem('referrerId');
+                    } catch(e) { console.error("Could not update referrer", e); }
+                }
             }
             
-            function hideScratchModal() {
-                scratchModalOverlay.classList.add('hidden');
-                scratchModalOverlay.classList.remove('modal-show');
-                scratchCardSection.classList.remove('modal-content-show');
-                mainContent.classList.remove('no-scroll');
-                canvas.classList.remove('hidden-scratch');
-                resultTextContainer.classList.add('opacity-0');
-                resultTextContainer.classList.remove('result-reveal');
-                referralSection.classList.add('hidden');
+            function hideScratchModal() { elements.scratchModalOverlay.classList.add('hidden'); }
+            
+            async function handleClaimFinalDiscount() {
+                if (!currentUserData) return;
+                const finalDiscount = (currentUserData.initialDiscount || 0) + (currentUserData.referralBonus || 0);
+
+                hideScratchModal();
+                elements.finalDiscountModal.classList.remove('hidden');
+
+                const animationDuration = 1500;
+                const frameDuration = 1000 / 60;
+                const totalFrames = Math.round(animationDuration / frameDuration);
+                let frame = 0;
+
+                const counter = () => {
+                    frame++;
+                    const progress = frame / totalFrames;
+                    const currentValue = finalDiscount * progress;
+                    elements.finalDiscountAnimation.textContent = `${currentValue.toFixed(1)}%`;
+                    elements.finalDiscountAnimation.classList.add('counter-animate');
+                    setTimeout(() => elements.finalDiscountAnimation.classList.remove('counter-animate'), 200);
+
+                    if (frame < totalFrames) {
+                        requestAnimationFrame(counter);
+                    } else {
+                        elements.finalDiscountAnimation.textContent = `${finalDiscount.toFixed(1)}%`;
+                    }
+                };
+                requestAnimationFrame(counter);
+                
+                elements.finalDiscountCode.textContent = currentUserData.discountCode;
+                
+                const userRef = doc(db, 'users', getUserIdFromStorage());
+                await updateDoc(userRef, { claimed: true });
+                if (unsubscribeUser) unsubscribeUser();
             }
 
-            function generateDiscount(isReferred) {
-                // Discount is capped at 5% for everyone
-                const discount = Math.floor(Math.random() * 5) + 1; // 1% to 5%
+            async function setupScratchCard() {
+                // If discount doesn't exist, generate and save it.
+                if (!currentUserData.initialDiscount) {
+                    const discount = Math.floor(Math.random() * 5) + 1; // 1 to 5
+                    const code = `PROMO-${Date.now().toString(36).slice(-4).toUpperCase()}`;
+                    
+                    currentUserData.initialDiscount = discount;
+                    currentUserData.discountCode = code;
+    
+                    const userRef = doc(db, 'users', getUserIdFromStorage());
+                    await updateDoc(userRef, { initialDiscount: discount, discountCode: code });
+                }
 
-                const uniquePart = Date.now().toString(36).slice(-4).toUpperCase();
-                const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
-                const code = `PROMO-${uniquePart}${randomPart}`;
-                return { discount, code };
-            }
+                // Display the existing or new discount
+                elements.initialDiscountDisplay.textContent = `${currentUserData.initialDiscount}% OFF`;
+                
+                const userRef = doc(db, 'users', getUserIdFromStorage());
+                if (unsubscribeUser) unsubscribeUser();
+                unsubscribeUser = onSnapshot(userRef, (docSnap) => {
+                    if (docSnap.exists()){
+                        currentUserData = docSnap.data();
+                        const bonus = currentUserData.referralBonus || 0;
+                        elements.referralBonusDisplay.textContent = `+${bonus.toFixed(1)}%`;
+                    }
+                });
 
-            function setupScratchCard() {
-                const isReferred = localStorage.getItem('isReferred') === 'true';
-                const { discount, code } = generateDiscount(isReferred);
-                resultTextEl.textContent = `${discount}% OFF`;
-                discountCodeEl.textContent = code;
-                saveToLocalStorage({ discount, code, timestamp: Date.now() });
-                if(isReferred) localStorage.removeItem('isReferred'); // Use the bonus once
-
+                const canvas = elements.canvas;
+                const ctx = canvas.getContext('2d');
                 const rect = canvas.getBoundingClientRect();
-                canvas.width = rect.width;
-                canvas.height = rect.height;
+                canvas.width = rect.width; canvas.height = rect.height;
                 
-                ctx.globalCompositeOperation = 'source-over';
-                
+                // Create a texture pattern for the scratch layer
                 const patternCanvas = document.createElement('canvas');
                 const patternCtx = patternCanvas.getContext('2d');
-                patternCanvas.width = 10; patternCanvas.height = 10;
-                patternCtx.fillStyle = '#374151';
+                patternCanvas.width = 10;
+                patternCanvas.height = 10;
+                patternCtx.fillStyle = '#374151'; // background color (gray-700)
                 patternCtx.fillRect(0, 0, 10, 10);
-                patternCtx.fillStyle = '#4b5563';
-                patternCtx.beginPath(); patternCtx.arc(2.5, 2.5, 1.5, 0, 2 * Math.PI); patternCtx.fill();
-                patternCtx.beginPath(); patternCtx.arc(7.5, 7.5, 1.5, 0, 2 * Math.PI); patternCtx.fill();
+                patternCtx.fillStyle = '#4b5563'; // dot color (gray-600)
+                patternCtx.beginPath();
+                patternCtx.arc(2.5, 2.5, 1.5, 0, 2 * Math.PI);
+                patternCtx.fill();
+                patternCtx.beginPath();
+                patternCtx.arc(7.5, 7.5, 1.5, 0, 2 * Math.PI);
+                patternCtx.fill();
                 const pattern = ctx.createPattern(patternCanvas, 'repeat');
                 ctx.fillStyle = pattern;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -351,106 +480,75 @@
                 ctx.font = '700 1.25rem Inter';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('Scratch Here to Reveal!', canvas.width / 2, canvas.height / 2);
-
-                let isDrawing = false;
-                let confettiFired = false;
-
-                function getEventPosition(event) {
-                    const rect = canvas.getBoundingClientRect();
-                    const scaleX = canvas.width / rect.width;
-                    const scaleY = canvas.height / rect.height;
-                    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-                    const clientY = event.touches ? event.touches[0].clientY : event.clientY;
-                    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
-                }
+                ctx.fillText('Scratch Here!', canvas.width / 2, canvas.height / 2);
                 
+                let confettiFired = false;
                 function revealCard() {
                     if (confettiFired) return;
-                    resultTextContainer.classList.remove('opacity-0');
-                    resultTextContainer.classList.add('result-reveal');
-                    confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
-                    canvas.classList.add('hidden-scratch');
-                    
-                    // Show referral link section
-                    const userId = getUserId();
-                    const referralLink = `${window.location.origin}${window.location.pathname}?ref=${userId}`;
-                    referralLinkDisplay.value = referralLink;
-                    referralSection.classList.remove('hidden');
-
                     confettiFired = true;
+                    elements.resultText.classList.remove('opacity-0');
+                    elements.resultText.classList.add('result-reveal');
+                    canvas.classList.add('hidden-scratch');
+                    confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+                    
+                    const userId = getUserIdFromStorage();
+                    const referralLink = `${window.location.origin}${window.location.pathname}?ref=${userId}`;
+                    elements.referralLinkDisplay.value = referralLink;
+                    elements.referralSection.classList.remove('hidden');
+                    elements.bonusSection.classList.remove('hidden');
                 }
+                
+                let isDrawing = false;
+                const getEventPosition = (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    return { x: clientX - rect.left, y: clientY - rect.top };
+                };
 
                 function getScratchedPercentage() {
                     let scratchedPixels = 0;
-                    const currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const currentPixelData = currentImageData.data;
-                    for (let i = 0; i < currentPixelData.length; i += 4) {
-                        if (currentPixelData[i + 3] === 0) scratchedPixels++;
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const pixelData = imageData.data;
+                    for (let i = 0; i < pixelData.length; i += 4) {
+                        if (pixelData[i + 3] === 0) {
+                            scratchedPixels++;
+                        }
                     }
-                    return scratchedPixels / (currentImageData.width * currentImageData.height);
+                    return scratchedPixels / (canvas.width * canvas.height);
                 }
 
-                function scratch(e) {
-                    if (!isDrawing) return;
+                const scratch = (e) => {
                     e.preventDefault();
+                    if (!isDrawing) return;
                     const pos = getEventPosition(e);
                     ctx.globalCompositeOperation = 'destination-out';
-                    ctx.beginPath();
-                    ctx.arc(pos.x, pos.y, 30, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    if (getScratchedPercentage() > config.revealThreshold) {
+                    ctx.beginPath(); ctx.arc(pos.x, pos.y, 35, 0, Math.PI * 2); ctx.fill();
+                    
+                    if (!confettiFired && getScratchedPercentage() > config.revealThreshold) {
                         revealCard();
                     }
-                }
-
-                function startScratch(e) { 
-                    isDrawing = true; 
-                    if (e.type === 'touchstart') e.preventDefault();
-                    scratch(e); 
-                }
-                
-                function stopScratch() {
-                    isDrawing = false;
-                    if (!confettiFired && getScratchedPercentage() > config.revealThreshold * 0.5) {
-                        revealCard();
+                };
+                const startScratch = (e) => { isDrawing = true; scratch(e); };
+                const stopScratch = () => { 
+                    if(isDrawing) { 
+                        isDrawing = false; 
+                        if (!confettiFired && getScratchedPercentage() > config.revealThreshold) {
+                            revealCard();
+                        }
                     }
-                }
-                
+                };
+
                 ['mousedown', 'touchstart'].forEach(evt => canvas.addEventListener(evt, startScratch, { passive: false }));
                 ['mousemove', 'touchmove'].forEach(evt => canvas.addEventListener(evt, scratch, { passive: false }));
-                ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(evt => canvas.addEventListener(evt, stopScratch));
+                ['mouseup', 'mouseleave', 'touchend'].forEach(evt => canvas.addEventListener(evt, stopScratch));
             }
             
             function copyReferralLink() {
-                // Fallback for older browsers/secure contexts
-                const textArea = document.createElement("textarea");
-                textArea.value = referralLinkDisplay.value;
-                textArea.style.position = "fixed"; // Avoid scrolling to bottom
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    copyFeedback.textContent = 'Copied to clipboard!';
-                } catch (err) {
-                    copyFeedback.textContent = 'Failed to copy!';
-                }
-                document.body.removeChild(textArea);
-                
-                setTimeout(() => { copyFeedback.textContent = ''; }, 2000);
-            }
-
-            function saveToLocalStorage(data) { localStorage.setItem('discountData', JSON.stringify(data)); }
-            function getFromLocalStorage() {
-                const dataStr = localStorage.getItem('discountData');
-                if (!dataStr) return null;
-                const data = JSON.parse(dataStr);
-                const hoursSinceClaimed = (Date.now() - data.timestamp) / 3600000;
-                if (hoursSinceClaimed < config.cooldownHours) return data;
-                localStorage.removeItem('discountData');
-                return null;
+                navigator.clipboard.writeText(elements.referralLinkDisplay.value).then(() => {
+                    elements.copyFeedback.textContent = 'Copied!';
+                    setTimeout(() => elements.copyFeedback.textContent = '', 2000);
+                });
             }
 
             init();
