@@ -174,14 +174,14 @@
                 projectId: "scratchcard-e789d",
                 storageBucket: "scratchcard-e789d.appspot.com",
                 messagingSenderId: "1020798468185",
-                appId: "1:1020798468185:web:21d8ded5ca4ccc0842f148"
+                appId: "1:1020798468185:web:2d8ded5ca4ccc0842f148"
             };
 
             const config = {
                 restaurantName: "Hotel Khandesh Wada",
                 logoUrl: "kw.PNG",
                 tasks: [
-                    { name: "Google Review", description: "Leave us a review on Google", icon: `<svg xmlns="http://www.w.3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" class="text-red-500"><path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12.5C5,8.75 8.36,5.73 12.19,5.73C15.19,5.73 17.55,6.82 17.55,6.82L19.43,5C19.43,5 17.55,3 12.19,3C6.42,3 2.03,7.8 2.03,12.5C2.03,17.2 6.42,22 12.19,22C17.6,22 21.7,18.35 21.7,12.91C21.7,12.16 21.55,11.6 21.35,11.1Z"/></svg>`, url: "https://maps.app.goo.gl/SggpAD2sniLMkmeu6" },
+                    { name: "Google Review", description: "Leave us a review on Google", icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" class="text-red-500"><path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12.5C5,8.75 8.36,5.73 12.19,5.73C15.19,5.73 17.55,6.82 17.55,6.82L19.43,5C19.43,5 17.55,3 12.19,3C6.42,3 2.03,7.8 2.03,12.5C2.03,17.2 6.42,22 12.19,22C17.6,22 21.7,18.35 21.7,12.91C21.7,12.16 21.55,11.6 21.35,11.1Z"/></svg>`, url: "https://maps.app.goo.gl/SggpAD2sniLMkmeu6" },
                     { name: "Instagram Follow", description: "Follow us on Instagram", icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="stroke-red-500"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`, url: "https://www.instagram.com/hotelkhandeshwadajalgaon?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" }
                 ],
                 sessionMinutes: 30,
@@ -226,12 +226,8 @@
             let currentSessionData = null;
             let unsubscribeSession;
 
-            async function initFirebase() { /* ... same as before ... */ }
-            function showScreen(screen) { /* ... same as before ... */ }
-            // Helper to get ID from local storage
             function getLocalId(key) { return localStorage.getItem(key); }
             function setLocalId(key, id) { localStorage.setItem(key, id); }
-
 
             async function init() {
                 showScreen('loadingSpinner');
@@ -242,11 +238,9 @@
                 const sessionId = urlParams.get('session');
 
                 if (sessionId) {
-                    // This is User B, the friend.
-                    history.replaceState(null, '', window.location.pathname); // Clean URL
+                    history.replaceState(null, '', window.location.pathname); 
                     await setupReferredUserFlow(sessionId);
                 } else {
-                    // This is User A, the original user.
                     const userId = getLocalId('userId');
                     if (userId) {
                         const userData = await getDoc(doc(db, 'users', userId));
@@ -261,7 +255,6 @@
                 }
             }
 
-            // --- User A (Original User) Flow ---
             function showMainUserFlow() {
                 showScreen('userDetailsSection');
                 elements.userDetailsForm.addEventListener('submit', handleUserSubmit);
@@ -287,7 +280,6 @@
                 showTaskScreen("Complete a couple of tasks to unlock a surprise discount!");
             }
 
-            // --- User B (Referred Friend) Flow ---
             async function setupReferredUserFlow(sessionId) {
                 const sessionRef = doc(db, 'sessions', sessionId);
                 const sessionSnap = await getDoc(sessionRef);
@@ -305,11 +297,10 @@
                     return;
                 }
                 
-                setLocalId('sessionId', sessionId); // Store session ID for later
+                setLocalId('sessionId', sessionId);
                 showTaskScreen("Help your friend get a bigger discount by completing these tasks!");
             }
 
-             // --- Shared Task Logic ---
             function showTaskScreen(subtitle) {
                 showScreen('headerSection');
                 elements.headerSubtitle.textContent = subtitle;
@@ -322,7 +313,7 @@
                 document.getElementById('restaurant-name').textContent = config.restaurantName;
                 document.getElementById('logo').src = config.logoUrl;
                 document.getElementById('logo-top').src = config.logoUrl;
-                tasksState = config.tasks.map(() => false); // Reset tasks state
+                tasksState = config.tasks.map(() => false);
 
                 config.tasks.forEach((task, index) => {
                     const taskEl = document.createElement('div');
@@ -376,7 +367,6 @@
                 }
             }
             
-            // --- Final actions for User A ---
             async function handleGetCard() {
                 elements.scratchModalOverlay.classList.remove('hidden');
                 
@@ -402,7 +392,6 @@
                 hideScratchModal();
                 elements.finalDiscountModal.classList.remove('hidden');
                 
-                // Animation logic...
                 const animationDuration = 1500;
                 let frame = 0;
                 const totalFrames = Math.round(animationDuration / (1000/60));
@@ -418,7 +407,6 @@
                 
                 elements.finalDiscountCode.textContent = currentSessionData.discountCode;
                 
-                // Finalize user and delete session
                 const userRef = doc(db, 'users', getLocalId('userId'));
                 await updateDoc(userRef, { claimed: true, discountCode: currentSessionData.discountCode });
                 
@@ -429,7 +417,6 @@
                 localStorage.removeItem('sessionId');
             }
 
-            // --- Final action for User B ---
             async function handleBoost() {
                 const sessionId = getLocalId('sessionId');
                 const sessionRef = doc(db, 'sessions', sessionId);
@@ -454,9 +441,7 @@
 
                 const canvas = elements.canvas;
                 const ctx = canvas.getContext('2d');
-                // ... Scratch card drawing and interaction logic ...
-                // This part is largely the same as the previous correct version.
-                 const rect = canvas.getBoundingClientRect();
+                const rect = canvas.getBoundingClientRect();
                 canvas.width = rect.width; canvas.height = rect.height;
                 
                 const patternCanvas = document.createElement('canvas');
@@ -500,11 +485,45 @@
                     return { x: clientX - rect.left, y: clientY - rect.top };
                 };
 
-                const getScratchedPercentage = () => { /* ... same ... */ };
+                const getScratchedPercentage = () => {
+                    let scratchedPixels = 0;
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const pixelData = imageData.data;
+                    for (let i = 0; i < pixelData.length; i += 4) {
+                        if (pixelData[i + 3] === 0) {
+                            scratchedPixels++;
+                        }
+                    }
+                    return scratchedPixels / (canvas.width * canvas.height);
+                };
 
-                const scratch = (e) => { /* ... same ... */ };
-                const startScratch = (e) => { /* ... same ... */ };
-                const stopScratch = () => { /* ... same ... */ };
+                const scratch = (e) => {
+                    e.preventDefault();
+                    if (!isDrawing) return;
+                    const pos = getEventPosition(e);
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y, 35, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    if (!confettiFired && getScratchedPercentage() > config.revealThreshold) {
+                        revealCard();
+                    }
+                };
+                
+                const startScratch = (e) => {
+                    isDrawing = true;
+                    scratch(e);
+                };
+                
+                const stopScratch = () => {
+                    if (isDrawing) {
+                        isDrawing = false;
+                        if (!confettiFired && getScratchedPercentage() > config.revealThreshold) {
+                            revealCard();
+                        }
+                    }
+                };
 
                 ['mousedown', 'touchstart'].forEach(evt => canvas.addEventListener(evt, startScratch, { passive: false }));
                 ['mousemove', 'touchmove'].forEach(evt => canvas.addEventListener(evt, scratch, { passive: false }));
@@ -525,17 +544,14 @@
             }
             
             function hideScratchModal() { elements.scratchModalOverlay.classList.add('hidden'); }
-            function copyReferralLink() { /* ... same as before ... */ }
-
-            // Initial event listeners
-            elements.getCardBtn.addEventListener('click', handleGetCard);
-            elements.boostBtn.addEventListener('click', handleBoost);
-            elements.closeModalBtn.addEventListener('click', hideScratchModal);
-            elements.copyLinkBtn.addEventListener('click', copyReferralLink);
-            elements.claimFinalBtn.addEventListener('click', handleClaimFinalDiscount);
             
-            // Re-implementing functions that were removed in the thought process but are still needed.
-            // These were just collapsed in the thought process but need to be here in the final code.
+            function copyReferralLink() {
+                navigator.clipboard.writeText(elements.referralLinkDisplay.value).then(() => {
+                    elements.copyFeedback.textContent = 'Copied!';
+                    setTimeout(() => elements.copyFeedback.textContent = '', 2000);
+                });
+            }
+
             async function initFirebase() {
                 try {
                     const app = initializeApp(firebaseConfig);
@@ -553,31 +569,20 @@
                     return false;
                 }
             }
-             function showScreen(screen) {
+
+            function showScreen(screen) {
                 ['loadingSpinner', 'userDetailsSection', 'headerSection', 'tasksSection', 'getCardButtonSection', 'boostFriendSection', 'infoSection'].forEach(s => {
                     if (elements[s]) { elements[s].classList.add('hidden'); }
                 });
                 if (elements[screen]) { elements[screen].classList.remove('hidden'); }
             }
-            function copyReferralLink() {
-                navigator.clipboard.writeText(elements.referralLinkDisplay.value).then(() => {
-                    elements.copyFeedback.textContent = 'Copied!';
-                    setTimeout(() => elements.copyFeedback.textContent = '', 2000);
-                });
-            }
-             function getScratchedPercentage(canvas, ctx) {
-                let scratchedPixels = 0;
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const pixelData = imageData.data;
-                for (let i = 0; i < pixelData.length; i += 4) {
-                    if (pixelData[i + 3] === 0) {
-                        scratchedPixels++;
-                    }
-                }
-                return scratchedPixels / (canvas.width * canvas.height);
-            }
-
-
+            
+            elements.getCardBtn.addEventListener('click', handleGetCard);
+            elements.boostBtn.addEventListener('click', handleBoost);
+            elements.closeModalBtn.addEventListener('click', hideScratchModal);
+            elements.copyLinkBtn.addEventListener('click', copyReferralLink);
+            elements.claimFinalBtn.addEventListener('click', handleClaimFinalDiscount);
+            
             init();
         });
     </script>
