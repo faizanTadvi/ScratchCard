@@ -244,17 +244,9 @@
                     history.replaceState(null, '', window.location.pathname); 
                     await setupReferredUserFlow(sessionId);
                 } else {
-                    const userId = getLocalId('userId');
-                    if (userId) {
-                        const userData = await getDoc(doc(db, 'users', userId));
-                        if (userData.exists() && userData.data().claimed) {
-                           showInfoScreen("Welcome Back!", "You've already claimed a discount today. Here's your code:", userData.data().discountCode);
-                        } else {
-                           showMainUserFlow();
-                        }
-                    } else {
-                        showMainUserFlow();
-                    }
+                    // Daily user cooldown has been disabled for testing purposes.
+                    // This will allow you to start a new session every time you load the page.
+                    showMainUserFlow();
                 }
             }
 
@@ -593,5 +585,4 @@
     </script>
 </body>
 </html>
-
 
