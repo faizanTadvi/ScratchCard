@@ -229,7 +229,7 @@
             function getLocalId(key) { return localStorage.getItem(key); }
             function setLocalId(key, id) { localStorage.setItem(key, id); }
 
-            async function init() {
+            function init() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const sessionId = urlParams.get('session');
 
@@ -259,7 +259,7 @@
 
                 if (!firebaseReady) {
                     console.log("Waiting for Firebase to initialize...");
-                    await initFirebase(); // Ensure it's ready before proceeding
+                    await initFirebase();
                 }
 
                 const userName = document.getElementById('user-name').value;
@@ -286,7 +286,8 @@
             async function setupReferredUserFlow(sessionId) {
                 if (!firebaseReady) {
                     showInfoScreen("Connecting...", "Please wait while we validate the link.");
-                    return; // Firebase will call this again when ready
+                    // When firebase is ready, it will re-check this logic
+                    return;
                 }
                 const sessionRef = doc(db, 'sessions', sessionId);
                 const sessionSnap = await getDoc(sessionRef);
@@ -305,7 +306,6 @@
                 }
                 
                 setLocalId('sessionId', sessionId);
-                // Task screen is already showing, this just confirms it's valid.
             }
 
             function showTaskScreen(subtitle) {
@@ -454,7 +454,100 @@
 
                 const canvas = elements.canvas;
                 const ctx = canvas.getContext('2d');
-                // Scratch card drawing logic...
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+
+                // Draw the scratchable layer with a texture
+                const patternCanvas = document.createElement('canvas');
+                const patternCtx = patternCanvas.getContext('2d');
+                patternCanvas.width = 10;
+                patternCanvas.height = 10;
+                patternCtx.fillStyle = '#374151';
+                patternCtx.fillRect(0, 0, 10, 10);
+                patternCtx.fillStyle = '#4b5563';
+                patternCtx.beginPath();
+                patternCtx.arc(2.5, 2.5, 1.5, 0, 2 * Math.PI);
+                patternCtx.fill();
+                patternCtx.beginPath();
+                patternCtx.arc(7.5, 7.5, 1.5, 0, 2 * Math.PI);
+                patternCtx.fill();
+                const pattern = ctx.createPattern(patternCanvas, 'repeat');
+                ctx.fillStyle = pattern;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.font = '700 1.25rem Inter';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('Scratch Here!', canvas.width / 2, canvas.height / 2);
+
+                let confettiFired = false;
+                function revealCard() {
+                    if (confettiFired) return;
+                    confettiFired = true;
+                    elements.resultText.classList.remove('opacity-0');
+                    elements.resultText.classList.add('result-reveal');
+                    canvas.classList.add('hidden-scratch');
+                    confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+
+                    const referralLink = `${window.location.origin}${window.location.pathname}?session=${sessionId}`;
+                    elements.referralLinkDisplay.value = referralLink;
+                    elements.referralSection.classList.remove('hidden');
+                    elements.bonusSection.classList.remove('hidden');
+                }
+
+                let isDrawing = false;
+                const getEventPosition = (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    return { x: clientX - rect.left, y: clientY - rect.top };
+                };
+
+                const getScratchedPercentage = () => {
+                    let scratchedPixels = 0;
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const pixelData = imageData.data;
+                    for (let i = 0; i < pixelData.length; i += 4) {
+                        if (pixelData[i + 3] === 0) {
+                            scratchedPixels++;
+                        }
+                    }
+                    return scratchedPixels / (canvas.width * canvas.height);
+                };
+
+                const scratch = (e) => {
+                    e.preventDefault();
+                    if (!isDrawing) return;
+                    const pos = getEventPosition(e);
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y, 35, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    if (!confettiFired && getScratchedPercentage() > config.revealThreshold) {
+                        revealCard();
+                    }
+                };
+
+                const startScratch = (e) => {
+                    isDrawing = true;
+                    scratch(e);
+                };
+
+                const stopScratch = () => {
+                    if (isDrawing) {
+                        isDrawing = false;
+                        if (!confettiFired && getScratchedPercentage() > config.revealThreshold) {
+                            revealCard();
+                        }
+                    }
+                };
+
+                ['mousedown', 'touchstart'].forEach(evt => canvas.addEventListener(evt, startScratch, { passive: false }));
+                ['mousemove', 'touchmove'].forEach(evt => canvas.addEventListener(evt, scratch, { passive: false }));
+                ['mouseup', 'mouseleave', 'touchend'].forEach(evt => canvas.addEventListener(evt, stopScratch));
             }
             
             function showInfoScreen(title, message, code = '') {
@@ -480,22 +573,32 @@
 
             async function initFirebase() {
                 if (firebaseReady) return true;
-                try {
-                    const app = initializeApp(firebaseConfig);
-                    db = getFirestore(app);
-                    auth = getAuth(app);
-                    await signInAnonymously(auth);
-                    firebaseReady = true;
-                    return true;
-                } catch (error) {
-                    console.error("Firebase Init Error:", error);
-                    let message = "Could not connect to Firebase. Please check the console.";
-                    if (error.code === 'auth/configuration-not-found') {
-                         message = "Configuration Error: Please enable Anonymous Authentication in your Firebase project's console.";
+                return new Promise(async (resolve) => {
+                    try {
+                        const app = initializeApp(firebaseConfig);
+                        db = getFirestore(app);
+                        auth = getAuth(app);
+                        await signInAnonymously(auth);
+                        firebaseReady = true;
+                        
+                        // If this was a referred user, re-run the setup logic now that firebase is ready
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const sessionId = urlParams.get('session');
+                        if(sessionId) {
+                           await setupReferredUserFlow(sessionId);
+                        }
+                        resolve(true);
+
+                    } catch (error) {
+                        console.error("Firebase Init Error:", error);
+                        let message = "Could not connect to Firebase. Please check the console.";
+                        if (error.code === 'auth/configuration-not-found') {
+                            message = "Configuration Error: Please enable Anonymous Authentication in your Firebase project's console.";
+                        }
+                        showInfoScreen("Connection Error", message);
+                        resolve(false);
                     }
-                    showInfoScreen("Connection Error", message);
-                    return false;
-                }
+                });
             }
 
             function showScreen(screen) {
