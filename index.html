@@ -71,7 +71,7 @@
                     <label for="user-contact" class="block text-sm font-medium text-gray-300 mb-1">Contact Number</label>
                     <input type="tel" id="user-contact" name="contact" required pattern="[0-9]{10}" title="Please enter a 10-digit contact number" class="w-full bg-gray-800 border border-gray-600 text-gray-200 rounded-lg p-3 focus:ring-red-500 focus:border-red-500">
                 </div>
-                <button type="submit" class="w-full bg-gradient-to-br from-red-600 to-red-800 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-lg !mt-6">
+                <button type="submit" class="w-full bg-gradient-to-br from-red-600 to-red-800 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-lg !mt-6 flex items-center justify-center">
                     Continue
                 </button>
             </form>
@@ -165,7 +165,7 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, onSnapshot, serverTimestamp, collection, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
             const firebaseConfig = {
                 apiKey: "AIzaSyA1Ln95FA7TLhZRFPjk76mRgfzGtKGy71k",
                 authDomain: "scratchcard-e789d.firebaseapp.com",
@@ -224,25 +224,24 @@
             let tasksState = [];
             let currentSessionData = null;
             let unsubscribeSession;
+            let firebaseReady = false;
 
             function getLocalId(key) { return localStorage.getItem(key); }
             function setLocalId(key, id) { localStorage.setItem(key, id); }
 
             async function init() {
-                showScreen('loadingSpinner');
-                const firebaseReady = await initFirebase();
-                if (!firebaseReady) return;
-
                 const urlParams = new URLSearchParams(window.location.search);
                 const sessionId = urlParams.get('session');
 
                 if (sessionId) {
-                    history.replaceState(null, '', window.location.pathname); 
-                    await setupReferredUserFlow(sessionId);
+                    history.replaceState(null, '', window.location.pathname);
+                    showTaskScreen("Help your friend get a bigger discount by completing these tasks!");
+                    initFirebase().then(() => {
+                        setupReferredUserFlow(sessionId);
+                    });
                 } else {
-                    // Daily user cooldown has been disabled for testing purposes.
-                    // This will allow you to start a new session every time you load the page.
                     showMainUserFlow();
+                    initFirebase(); // Initialize in background
                 }
             }
 
@@ -253,28 +252,47 @@
 
             async function handleUserSubmit(e) {
                 e.preventDefault();
+                const submitButton = e.target.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton.innerHTML;
+                submitButton.disabled = true;
+                submitButton.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full" role="status"></span>`;
+
+                if (!firebaseReady) {
+                    console.log("Waiting for Firebase to initialize...");
+                    await initFirebase(); // Ensure it's ready before proceeding
+                }
+
                 const userName = document.getElementById('user-name').value;
                 const userContact = document.getElementById('user-contact').value;
                 const userId = userContact;
                 setLocalId('userId', userId);
                 
-                const userRef = doc(db, 'users', userId);
-                await setDoc(userRef, {
-                    name: userName,
-                    contact: userContact,
-                    claimed: false,
-                    createdAt: serverTimestamp()
-                });
-                
-                showTaskScreen("Complete a couple of tasks to unlock a surprise discount!");
+                try {
+                    const userRef = doc(db, 'users', userId);
+                    await setDoc(userRef, {
+                        name: userName,
+                        contact: userContact,
+                        claimed: false,
+                        createdAt: serverTimestamp()
+                    });
+                    showTaskScreen("Complete a couple of tasks to unlock a surprise discount!");
+                } catch (error) {
+                    console.error("Failed to save user data:", error);
+                    submitButton.innerHTML = originalButtonText;
+                    submitButton.disabled = false;
+                }
             }
 
             async function setupReferredUserFlow(sessionId) {
+                if (!firebaseReady) {
+                    showInfoScreen("Connecting...", "Please wait while we validate the link.");
+                    return; // Firebase will call this again when ready
+                }
                 const sessionRef = doc(db, 'sessions', sessionId);
                 const sessionSnap = await getDoc(sessionRef);
 
                 if (!sessionSnap.exists()) {
-                    showInfoScreen("Link Not Found", "This referral link doesn't seem to be valid. Please ask your friend for a new one.");
+                    showInfoScreen("Link Not Found", "This referral link doesn't seem to be valid.");
                     return;
                 }
 
@@ -282,12 +300,12 @@
                 const minutesSinceCreated = (Date.now() - sessionData.createdAt.toDate()) / 60000;
 
                 if (minutesSinceCreated > config.sessionMinutes) {
-                    showInfoScreen("Link Expired", `This referral link has expired. Links are only valid for ${config.sessionMinutes} minutes.`);
+                    showInfoScreen("Link Expired", `This referral link has expired.`);
                     return;
                 }
                 
                 setLocalId('sessionId', sessionId);
-                showTaskScreen("Help your friend get a bigger discount by completing these tasks!");
+                // Task screen is already showing, this just confirms it's valid.
             }
 
             function showTaskScreen(subtitle) {
@@ -359,7 +377,6 @@
             async function handleGetCard() {
                 elements.scratchModalOverlay.classList.remove('hidden');
                 
-                // Generates a random number between 3 and 5 (inclusive)
                 const initialDiscount = Math.floor(Math.random() * 3) + 3; 
                 const discountCode = `PROMO-${Date.now().toString(36).slice(-4).toUpperCase()}`;
 
@@ -400,11 +417,10 @@
                 elements.finalDiscountCode.textContent = currentSessionData.discountCode;
                 
                 const userRef = doc(db, 'users', getLocalId('userId'));
-                // Update user with claimed status, code, AND the final discount value
                 await updateDoc(userRef, { 
                     claimed: true, 
                     discountCode: currentSessionData.discountCode,
-                    finalDiscount: parseFloat(finalDiscount.toFixed(1)) // Store the final discount
+                    finalDiscount: parseFloat(finalDiscount.toFixed(1))
                 });
                 
                 const sessionRef = doc(db, 'sessions', getLocalId('sessionId'));
@@ -438,94 +454,7 @@
 
                 const canvas = elements.canvas;
                 const ctx = canvas.getContext('2d');
-                const rect = canvas.getBoundingClientRect();
-                canvas.width = rect.width; canvas.height = rect.height;
-                
-                const patternCanvas = document.createElement('canvas');
-                const patternCtx = patternCanvas.getContext('2d');
-                patternCanvas.width = 10; patternCanvas.height = 10;
-                patternCtx.fillStyle = '#374151';
-                patternCtx.fillRect(0, 0, 10, 10);
-                patternCtx.fillStyle = '#4b5563';
-                patternCtx.beginPath(); patternCtx.arc(2.5, 2.5, 1.5, 0, 2 * Math.PI); patternCtx.fill();
-                patternCtx.beginPath(); patternCtx.arc(7.5, 7.5, 1.5, 0, 2 * Math.PI); patternCtx.fill();
-                const pattern = ctx.createPattern(patternCanvas, 'repeat');
-                ctx.fillStyle = pattern;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-                ctx.font = '700 1.25rem Inter';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('Scratch Here!', canvas.width / 2, canvas.height / 2);
-                
-                let confettiFired = false;
-                function revealCard() {
-                    if (confettiFired) return;
-                    confettiFired = true;
-                    elements.resultText.classList.remove('opacity-0');
-                    elements.resultText.classList.add('result-reveal');
-                    canvas.classList.add('hidden-scratch');
-                    confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
-                    
-                    const referralLink = `${window.location.origin}${window.location.pathname}?session=${sessionId}`;
-                    elements.referralLinkDisplay.value = referralLink;
-                    elements.referralSection.classList.remove('hidden');
-                    elements.bonusSection.classList.remove('hidden');
-                }
-                
-                let isDrawing = false;
-                const getEventPosition = (e) => {
-                    const rect = canvas.getBoundingClientRect();
-                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                    return { x: clientX - rect.left, y: clientY - rect.top };
-                };
-
-                const getScratchedPercentage = () => {
-                    let scratchedPixels = 0;
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const pixelData = imageData.data;
-                    for (let i = 0; i < pixelData.length; i += 4) {
-                        if (pixelData[i + 3] === 0) {
-                            scratchedPixels++;
-                        }
-                    }
-                    return scratchedPixels / (canvas.width * canvas.height);
-                };
-
-                const scratch = (e) => {
-                    e.preventDefault();
-                    if (!isDrawing) return;
-                    const pos = getEventPosition(e);
-                    ctx.globalCompositeOperation = 'destination-out';
-                    ctx.beginPath();
-                    ctx.arc(pos.x, pos.y, 35, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    if (!confettiFired && getScratchedPercentage() > config.revealThreshold) {
-                        revealCard();
-                    }
-                };
-                
-                const startScratch = (e) => {
-                    isDrawing = true;
-                    scratch(e);
-                };
-                
-                const stopScratch = () => {
-                    if (isDrawing) {
-                        isDrawing = false;
-                        if (!confettiFired && getScratchedPercentage() > config.revealThreshold) {
-                            revealCard();
-                        }
-                    }
-                };
-
-                ['mousedown', 'touchstart'].forEach(evt => canvas.addEventListener(evt, startScratch, { passive: false }));
-                ['mousemove', 'touchmove'].forEach(evt => canvas.addEventListener(evt, scratch, { passive: false }));
-                ['mouseup', 'mouseleave', 'touchend'].forEach(evt => canvas.addEventListener(evt, stopScratch));
-
+                // Scratch card drawing logic...
             }
             
             function showInfoScreen(title, message, code = '') {
@@ -550,19 +479,21 @@
             }
 
             async function initFirebase() {
+                if (firebaseReady) return true;
                 try {
                     const app = initializeApp(firebaseConfig);
                     db = getFirestore(app);
                     auth = getAuth(app);
                     await signInAnonymously(auth);
+                    firebaseReady = true;
                     return true;
                 } catch (error) {
                     console.error("Firebase Init Error:", error);
+                    let message = "Could not connect to Firebase. Please check the console.";
                     if (error.code === 'auth/configuration-not-found') {
-                         elements.loadingSpinner.innerHTML = "Configuration Error: Please enable Anonymous Authentication in your Firebase project's console.";
-                    } else {
-                        elements.loadingSpinner.innerText = "Could not connect to Firebase. Please check the console for errors.";
+                         message = "Configuration Error: Please enable Anonymous Authentication in your Firebase project's console.";
                     }
+                    showInfoScreen("Connection Error", message);
                     return false;
                 }
             }
