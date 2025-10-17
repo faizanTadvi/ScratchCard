@@ -71,10 +71,6 @@
                     <label for="user-contact" class="block text-sm font-medium text-gray-300 mb-1">Contact Number</label>
                     <input type="tel" id="user-contact" name="contact" required pattern="[0-9]{10}" title="Please enter a 10-digit contact number" class="w-full bg-gray-800 border border-gray-600 text-gray-200 rounded-lg p-3 focus:ring-red-500 focus:border-red-500">
                 </div>
-                <div>
-                    <label for="table-number" class="block text-sm font-medium text-gray-300 mb-1">Table Number</label>
-                    <input type="number" id="table-number" name="table" required class="w-full bg-gray-800 border border-gray-600 text-gray-200 rounded-lg p-3 focus:ring-red-500 focus:border-red-500">
-                </div>
                 <button type="submit" class="w-full bg-gradient-to-br from-red-600 to-red-800 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-lg !mt-6">
                     Continue
                 </button>
@@ -259,7 +255,6 @@
                 e.preventDefault();
                 const userName = document.getElementById('user-name').value;
                 const userContact = document.getElementById('user-contact').value;
-                const tableNumber = document.getElementById('table-number').value;
                 const userId = userContact;
                 setLocalId('userId', userId);
                 
@@ -267,7 +262,6 @@
                 await setDoc(userRef, {
                     name: userName,
                     contact: userContact,
-                    table: tableNumber,
                     claimed: false,
                     createdAt: serverTimestamp()
                 });
@@ -365,7 +359,8 @@
             async function handleGetCard() {
                 elements.scratchModalOverlay.classList.remove('hidden');
                 
-                const initialDiscount = Math.floor(Math.random() * 5) + 1;
+                // Generates a random number between 3 and 5 (inclusive)
+                const initialDiscount = Math.floor(Math.random() * 3) + 3; 
                 const discountCode = `PROMO-${Date.now().toString(36).slice(-4).toUpperCase()}`;
 
                 const sessionRef = await addDoc(collection(db, 'sessions'), {
@@ -405,7 +400,12 @@
                 elements.finalDiscountCode.textContent = currentSessionData.discountCode;
                 
                 const userRef = doc(db, 'users', getLocalId('userId'));
-                await updateDoc(userRef, { claimed: true, discountCode: currentSessionData.discountCode });
+                // Update user with claimed status, code, AND the final discount value
+                await updateDoc(userRef, { 
+                    claimed: true, 
+                    discountCode: currentSessionData.discountCode,
+                    finalDiscount: parseFloat(finalDiscount.toFixed(1)) // Store the final discount
+                });
                 
                 const sessionRef = doc(db, 'sessions', getLocalId('sessionId'));
                 await deleteDoc(sessionRef);
